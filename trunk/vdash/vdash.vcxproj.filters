@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{561351ea-e8e3-4da1-9ce1-eb642e6954cb}</UniqueIdentifier>
+      <Extensions>*.c*</Extensions>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{e64dd007-47fe-4023-86e7-1ac10f6c4316}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="src\fsd">
+      <UniqueIdentifier>{2637f5a4-2b7b-43ac-ae0f-275d65860cf2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\utils">
+      <UniqueIdentifier>{94818243-749d-43b2-a564-1b06660e2dbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3d">
+      <UniqueIdentifier>{7e6b9508-6e64-484b-bf2b-a443e4c9a256}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\model">
+      <UniqueIdentifier>{dcad62cc-e379-48e7-b7d8-ae6a03f3f0aa}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\devio.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\xekey.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\exconfig.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\kernel.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\types.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="Mount.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fsd\SPA.h">
+      <Filter>src\fsd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fsd\Xbox360Container.h">
+      <Filter>src\fsd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fsd\XboxExecutable.h">
+      <Filter>src\fsd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fsd\XeXtractor.h">
+      <Filter>src\fsd</Filter>
+    </ClInclude>
+    <ClInclude Include="include\xecrypt.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ldic.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgConvert.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Scan.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameList.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\HardwareManager.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resource.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\shaders.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Video.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleIni.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="XMutex.h">
+      <Filter>src\model</Filter>
+    </ClInclude>
+    <ClInclude Include="XThread.h">
+      <Filter>src\model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TextureList.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mount.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Scan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fsd\SPA.cpp">
+      <Filter>src\fsd</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fsd\Xbox360Container.cpp">
+      <Filter>src\fsd</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fsd\XboxExecutable.cpp">
+      <Filter>src\fsd</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fsd\XeXtractor.cpp">
+      <Filter>src\fsd</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgConvert.cpp">
+      <Filter>src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameList.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HardwareManager.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HWWindows.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MM.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Video.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="vdash.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="XPool.h">
+      <Filter>src\model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextureList.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\Media\Fonts\Arial_16.rdf" />
+  </ItemGroup>
+</Project>
