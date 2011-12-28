@@ -25,6 +25,7 @@ typedef struct Game{
 	XEX_EXECUTION_ID XEX;
 	int type;
 	Pos position;
+	DWORD UniqId;//based on path
 } Game;
 
 typedef int (*GameListCallback)(std::vector <Game>::iterator, int i);
