@@ -80,7 +80,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Xbox 360'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\cc\Documents\Visual Studio 2010\Projects\vdash\Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Common;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CodeAnalysis|Xbox 360'">
     <LinkIncremental>true</LinkIncremental>
@@ -96,7 +96,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_LTCG|Xbox 360'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\cc\Documents\Visual Studio 2010\Projects\vdash\Common;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Common;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Xbox 360'">
     <ClCompile>
