@@ -78,6 +78,92 @@ static DWORD crc32(DWORD crc, const void *buf, size_t size)
 	return crc ^ ~0U;
 }
 
+static DWORD GetUniqId(Game *g){
+	char buf[256]; // tmp crc32
+	sprintf(buf, "%s", g->path.c_str());
+	int size = strlen(buf);
+
+	return crc32(0xFFFFFFFF,&buf,size);
+}
+
+// cache for scan
+struct cache_g{
+	char name[256];
+	DWORD uniqid;
+	XEX_EXECUTION_ID xex;
+};
+
+static std::vector<cache_g> q_g_cache;
+
+// Add game to cache
+void AddToCache(Game * g){
+	cache_g cache;
+	memset(&cache,0,sizeof(cache_g));
+
+	strcpy(cache.name,g->name.c_str());
+	cache.uniqid = g->UniqId;
+	cache.xex = g->XEX;
+
+	//printf("Add UniqId %x in cache \r\n",g->UniqId);
+	//printf("Add TitleID %x in cache \r\n",g->XEX.TitleID);
+
+	q_g_cache.push_back(cache);
+}
+
+// Get id by uniqid
+int GetFromCacheByUniqId(Game * dst, DWORD UniqId){
+	std::vector<cache_g>::iterator it;
+	for(it=q_g_cache.begin();it<q_g_cache.end();it++){
+		printf("UniqId %x in cache \r\n",it->xex.TitleID);
+		if(UniqId==it->uniqid)
+		{
+			dst->name = it->name;
+			dst->XEX = it->xex;
+			return 1;
+		}
+	}
+	return 0;
+}
+// Get it by titleid
+int GetFromCacheByTitleId(Game * dst, DWORD titleid){
+	std::vector<cache_g>::iterator it;
+	for(it=q_g_cache.begin();it<q_g_cache.end();it++){
+		if(titleid==it->xex.TitleID)
+		{
+			printf("Found %s in cache \r\n",it->name);
+			dst->name = it->name;
+			dst->XEX = it->xex;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+// load scan cache data
+void LoadScanCache(){
+	FILE * fd = fopen("game:\\cache\\scan.bin","rb");
+
+	if(fd){
+		while (!feof(fd)) {
+			cache_g c;
+			fread(&c,sizeof(cache_g),1,fd);
+			q_g_cache.push_back(c);
+		}
+		fclose(fd);
+	}
+}
+// save scan cache data
+void SaveScanCache(){
+	FILE * fd = fopen("game:\\cache\\scan.bin","wb");
+
+	if(fd){
+		std::vector<cache_g>::iterator it;
+		for(it=q_g_cache.begin();it<q_g_cache.end();it++){
+			fwrite(&(*it),sizeof(cache_g),1,fd);
+		}
+		fclose(fd);
+	}
+}
 
 //only check the filename
 static HRESULT FastCheckXex(const char * filename){
@@ -110,52 +196,79 @@ HRESULT CheckXex(const char * filename){
 			//XeXtractor & xtractor = XeXtractor::getInstance();
 			XeXtractor xtractor;
 			SPA spa;
-			std::string tname;
-			
-			// Get title name from xex
-			if(SUCCEEDED(xtractor.OpenXex(filename))){
+			Game * current = new Game;
+			ZeroMemory(current,sizeof(Game));
 
-				PBYTE pRessource=NULL;
-				DWORD Size;
+			current->path = filename;
+
+			// compute crc32 for cache filename
+			current->UniqId = GetUniqId(current);
+
+			// try to get info from uniqid
+			if(GetFromCacheByUniqId(current,current->UniqId)==0)
+			{			
+				// check from cache failed
+				// Get title name from xex
+				if(SUCCEEDED(xtractor.OpenXex(filename))){
+
+					int check_spa = 1;
+					PBYTE pRessource=NULL;
+					DWORD Size;
 				
-				HRESULT hr = xtractor.ExtractTitleSPA(&pRessource,&Size);
-				if(hr==S_OK)
-				{
-					printf("Open spa for %s %x\r\n",filename,hr);
-					
-					if(pRessource){
-						if(spa.OpenSPA(pRessource,Size)==S_OK){
-							spa.GetTitleName(&tname,XGetLanguage());
-							printf("=>%s\r\n",tname.c_str());
+					// try to get
+					XEX_EXECUTION_ID xxxx;
+					if(xtractor.GetExecutionId(&xxxx)==S_OK){
+						current->XEX = xxxx;
+						// try to get info from cache
+						if(GetFromCacheByTitleId(current,current->XEX.TitleID)){
+							check_spa = 0;
 						}
-						spa.CloseSPA();
 					}
+
+					if(check_spa){
+						HRESULT hr = xtractor.ExtractTitleSPA(&pRessource,&Size);
+						if(hr==S_OK)
+						{
+							printf("Open spa for %s %x\r\n",filename,hr);
 					
+							if(pRessource){
+								if(spa.OpenSPA(pRessource,Size)==S_OK){
+									spa.GetTitleName(&current->name,XGetLanguage());								
+								}
+								spa.CloseSPA();
+							}
+						}
+					}
 				}
-				
 			}
-			
-			
+
 			// set filename by defaut
-			if(tname.length()==0){
-				tname = fname;
+			if(current->name.length()==0){
+				// get it from dir name
+				char * tdir = dir;
+				int len = strlen(dir);
+
+				for(int i=0;i<len-1;i++){
+					if(dir[i]=='\\')
+						tdir=dir+i+1;
+				}
+
+				current->name = tdir;
+				//remove last \
+
+				current->name.resize(current->name.length()-1);
 			}
 
 			// compute nxeart path
 			char nxeart[MAX_PATH];
 			strcpy_s(nxeart,MAX_PATH,dir);
 			strcat_s(nxeart,MAX_PATH,"nxeart");
-
-			// Add game
-			Game * current = new Game;
-			ZeroMemory(current,sizeof(Game));
-			// try to get
-			xtractor.GetExecutionId(&current->XEX);
-			current->name = tname;
-			current->path = filename;
+			
 			current->type = G_XEX;
 			current->texture_filename = nxeart;
-			
+						
+			// Add game
+			AddToCache(current);
 			RessourceQueue.Add(current);
 
 			xtractor.CloseXex();
@@ -192,7 +305,7 @@ static HRESULT _ScanFolder(const char * folder){
 		return E_FAIL;
 	}
 
-	printf(TEXT("\nListing directory is %s\n\n"), folder);
+	//printf(TEXT("\nListing directory is %s\n\n"), folder);
 
 	// Prepare string for use with FindFile functions.  First, copy the
 	// string to a buffer, then append '\*' to the directory name.
@@ -275,10 +388,12 @@ static DWORD WINAPI ScanFolderThread(LPVOID args){
 static DWORD WINAPI ScanXexThread(LPVOID args ){
 	// always run when scan thread is running
 	DWORD exitcode;
-	
+	// load cache data ...
+	LoadScanCache();
 	do{
 		GetExitCodeThread(ScanThread,&exitcode);
 
+		
 		while(!XexQueue.IsEmpty()){
 			string * q = XexQueue.Remove();
 			if(SUCCEEDED(CheckXex(q->c_str()))){
@@ -288,6 +403,9 @@ static DWORD WINAPI ScanXexThread(LPVOID args ){
 		}
 	}
 	while(exitcode==STILL_ACTIVE);
+	// save cache data
+	SaveScanCache();
+	printf("Scan xex finished\r\n");
 	return 0;
 }
 
@@ -298,15 +416,15 @@ static DWORD WINAPI ScanRessourceThread(LPVOID args){
 	do{
 		GetExitCodeThread(XexThread,&exitcode);
 
+
+		LPDIRECT3DTEXTURE9 NullImg = Video::LoadTextureFromFile("game:\\cache\\noscreen.jpg");
+	
 		while(!RessourceQueue.IsEmpty()){
 			Game * q = RessourceQueue.Remove();
 			
 			// compute crc32 for cache filename
 			char ftmp[256]; // tmp filename
-			char buf[256]; // tmp crc32
-			sprintf(buf, "%s%s%x", q->name.c_str(),q->path.c_str()),q->name.length();
-			int size = strlen(buf);
-			sprintf(ftmp,"game:\\cache\\%08x.dds",crc32(0xFFFFFFFF,&buf,size));
+			sprintf(ftmp,"game:\\cache\\%08x.dds",q->UniqId);
 
 			string nxeart  = q->texture_filename;
 			q->texture_filename = ftmp;
@@ -337,8 +455,8 @@ static DWORD WINAPI ScanRessourceThread(LPVOID args){
 			else{
 				printf("No texture ...\r\n");
 				// default texture ...
-				q->texture = Video::LoadTextureFromFile("game:\\cache\\noscreen.jpg");
 				
+				q->texture = NullImg;
 			}
 
 			q->name_texture = NULL;
