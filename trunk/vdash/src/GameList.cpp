@@ -4,15 +4,59 @@
 #include "Mount.h"
 #include "Scan.h"
 
+#include <algorithm>
+
 GameList g_GameList;
 
-// 15668 -> 3 thread
-// 14906 -> 2 thread
-// 26761 -> 1 threaded 
-// 29382 -> 1 threaded + lock xex
-// 37004 -> no thread
+enum sort_order{
+	SORT_BY_NAME,
+	SORT_BY_TYPE,
+	SORT_BY_PATH
+};
+
+static bool sort_by_name( const Game &lhs, const Game & rhs )
+{
+	return lhs.name < rhs.name;
+}
+
+static bool sort_by_type( const Game &lhs, const Game & rhs )
+{
+	return lhs.type < rhs.type;
+}
+
+static bool sort_by_path( const Game &lhs, const Game & rhs )
+{
+	return lhs.path < rhs.path;
+}
+
+void GameList::SortByName(){
+	sort_order = SORT_BY_NAME;
+	Sort();
+};
+void GameList::SortByType(){
+	sort_order = SORT_BY_TYPE;
+	Sort();
+};
+void GameList::SortByPath(){
+	sort_order = SORT_BY_PATH;
+	Sort();
+};
+
+void GameList::Sort(){
+	switch(sort_order){
+		case SORT_BY_NAME:
+			sort (m_GameList.begin(), m_GameList.end(),sort_by_name);
+			break;
+		case SORT_BY_TYPE:
+			sort (m_GameList.begin(), m_GameList.end(),sort_by_type);
+			break;
+		case SORT_BY_PATH:
+			sort (m_GameList.begin(), m_GameList.end(),sort_by_path);
+			break;
+	}	
+}
+
 HRESULT GameList::LoadList(){
-	//AddFolderToScan("hdd1:\\DEVKIT");
 	AddFolderToScan("hdd1:");
 	AddFolderToScan("usb0:");
 
@@ -65,6 +109,7 @@ HRESULT GameList::LoadRessource(){
 void GameList::AddGame(Game game){
 	memset(&game.position,0,sizeof(Pos));
 	m_GameList.push_back(game);	
+	Sort();
 };
 
 void GameList::AddGame(std::string name,std::string path, std::string nexart_path, int type){

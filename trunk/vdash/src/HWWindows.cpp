@@ -229,6 +229,12 @@ void HardwareManager::Update(){
 	if ( BTN (XINPUT_GAMEPAD_DPAD_DOWN) ){
 		Video::MoveDown(); 
 	}
+	if ( BTN (XINPUT_GAMEPAD_LEFT_SHOULDER) ){
+		g_GameList.SortByName(); 
+	}
+	if ( BTN (XINPUT_GAMEPAD_RIGHT_SHOULDER) ){
+		g_GameList.SortByPath(); 
+	}
 	if ( BTN (XINPUT_GAMEPAD_A) ){
 		//
 		XLaunchNewImage(g_GameList.at(cs).path.c_str(),0);

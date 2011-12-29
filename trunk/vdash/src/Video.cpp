@@ -459,11 +459,11 @@ HRESULT Video::CompileShaders(){
 }
 
 LPDIRECT3DTEXTURE9 Video::CreateFontTexture(const char * str){
-	wchar_t wtext[256];
-
-	MultiByteToWideChar(CP_UTF8, 0, str, -1, wtext, 256);
+	int Size = MultiByteToWideChar (CP_ACP, 0, str, -1, NULL, 0);
+	LPWSTR wUnicode = new WCHAR[Size];
+	MultiByteToWideChar (CP_ACP, 0, str, -1, wUnicode, Size);
 	
-	return vFont.CreateTexture(wtext);
+	return vFont.CreateTexture(wUnicode);
 };
 
 LPDIRECT3DTEXTURE9 Video::LoadTextureFromFile(std::string filename){

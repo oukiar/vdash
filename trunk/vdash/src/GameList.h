@@ -35,12 +35,19 @@ class GameList
 private:
 	std::vector <Game> m_GameList;
 	std::vector <std::string> m_PathList;
+	int sort_order;
+	void Sort();
 public:
 	//
 	void AddGame(Game * game);
 	void AddGame(Game game);
 	void AddGame(std::string name,std::string path, LPDIRECT3DTEXTURE9 texture, int type);
 	void AddGame(std::string name,std::string path, std::string nexart_path, int type);
+
+	// sort list
+	void SortByName();
+	void SortByType();
+	void SortByPath();
 
 	Game at(int i){
 		return m_GameList.at(i);
@@ -64,6 +71,7 @@ public:
 	HRESULT LoadRessource();
 	//
 	GameList(void){
+		sort_order = 0;
 		m_GameList.reserve(500);
 	};
 	~GameList(void){
