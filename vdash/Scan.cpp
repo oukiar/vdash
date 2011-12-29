@@ -86,84 +86,88 @@ static DWORD GetUniqId(Game *g){
 	return crc32(0xFFFFFFFF,&buf,size);
 }
 
-// cache for scan
-struct cache_g{
-	char name[256];
-	DWORD uniqid;
-	XEX_EXECUTION_ID xex;
-};
+class ScanCache{
+private:
+	// cache for scan
+	struct cache_g{
+		char name[256];
+		DWORD uniqid;
+		XEX_EXECUTION_ID xex;
+	};
+	std::vector<cache_g> q_g_cache;
+public:
+	void Add(Game * g){
+		cache_g cache;
+		memset(&cache,0,sizeof(cache_g));
 
-static std::vector<cache_g> q_g_cache;
+		strcpy(cache.name,g->name.c_str());
+		cache.uniqid = g->UniqId;
+		cache.xex = g->XEX;
 
-// Add game to cache
-void AddToCache(Game * g){
-	cache_g cache;
-	memset(&cache,0,sizeof(cache_g));
+		//printf("Add UniqId %x in cache \r\n",g->UniqId);
+		//printf("Add TitleID %x in cache \r\n",g->XEX.TitleID);
 
-	strcpy(cache.name,g->name.c_str());
-	cache.uniqid = g->UniqId;
-	cache.xex = g->XEX;
-
-	//printf("Add UniqId %x in cache \r\n",g->UniqId);
-	//printf("Add TitleID %x in cache \r\n",g->XEX.TitleID);
-
-	q_g_cache.push_back(cache);
-}
-
-// Get id by uniqid
-int GetFromCacheByUniqId(Game * dst, DWORD UniqId){
-	std::vector<cache_g>::iterator it;
-	for(it=q_g_cache.begin();it<q_g_cache.end();it++){
-		printf("UniqId %x in cache \r\n",it->xex.TitleID);
-		if(UniqId==it->uniqid)
-		{
-			dst->name = it->name;
-			dst->XEX = it->xex;
-			return 1;
-		}
+		q_g_cache.push_back(cache);
 	}
-	return 0;
-}
-// Get it by titleid
-int GetFromCacheByTitleId(Game * dst, DWORD titleid){
-	std::vector<cache_g>::iterator it;
-	for(it=q_g_cache.begin();it<q_g_cache.end();it++){
-		if(titleid==it->xex.TitleID)
-		{
-			printf("Found %s in cache \r\n",it->name);
-			dst->name = it->name;
-			dst->XEX = it->xex;
-			return 1;
-		}
-	}
-	return 0;
-}
-
-// load scan cache data
-void LoadScanCache(){
-	FILE * fd = fopen("game:\\cache\\scan.bin","rb");
-
-	if(fd){
-		while (!feof(fd)) {
-			cache_g c;
-			fread(&c,sizeof(cache_g),1,fd);
-			q_g_cache.push_back(c);
-		}
-		fclose(fd);
-	}
-}
-// save scan cache data
-void SaveScanCache(){
-	FILE * fd = fopen("game:\\cache\\scan.bin","wb");
-
-	if(fd){
+	int GetByUniqId(Game * dst, DWORD UniqId){
 		std::vector<cache_g>::iterator it;
 		for(it=q_g_cache.begin();it<q_g_cache.end();it++){
-			fwrite(&(*it),sizeof(cache_g),1,fd);
+			//printf("UniqId %x in cache \r\n",it->xex.TitleID);
+			if(UniqId==it->uniqid)
+			{
+				dst->name = it->name;
+				dst->XEX = it->xex;
+				return 1;
+			}
 		}
-		fclose(fd);
+		return 0;
 	}
-}
+	// Get it by titleid
+	int GetByTitleId(Game * dst, DWORD titleid){
+		if(titleid>0){
+			std::vector<cache_g>::iterator it;
+			for(it=q_g_cache.begin();it<q_g_cache.end();it++){
+				if(titleid==it->xex.TitleID)
+				{
+					printf("Found %s in cache \r\n",it->name);
+					dst->name = it->name;
+					dst->XEX = it->xex;
+					return 1;
+				}
+			}
+		}
+		return 0;
+	}
+	
+	// load scan cache data
+	void Load(){
+		FILE * fd = fopen("game:\\cache\\scan.bin","rb");
+
+		if(fd){
+			while (!feof(fd)) {
+				cache_g c;
+				fread(&c,sizeof(cache_g),1,fd);
+				q_g_cache.push_back(c);
+			}
+			fclose(fd);
+		}
+	}
+	// save scan cache data
+	void Save(){
+		FILE * fd = fopen("game:\\cache\\scan.bin","wb");
+
+		if(fd){
+			std::vector<cache_g>::iterator it;
+			for(it=q_g_cache.begin();it<q_g_cache.end();it++){
+				fwrite(&(*it),sizeof(cache_g),1,fd);
+			}
+			fclose(fd);
+		}
+	}
+};
+
+static ScanCache sCache;
+
 
 //only check the filename
 static HRESULT FastCheckXex(const char * filename){
@@ -205,7 +209,7 @@ HRESULT CheckXex(const char * filename){
 			current->UniqId = GetUniqId(current);
 
 			// try to get info from uniqid
-			if(GetFromCacheByUniqId(current,current->UniqId)==0)
+			if(sCache.GetByUniqId(current,current->UniqId)==0)
 			{			
 				// check from cache failed
 				// Get title name from xex
@@ -220,7 +224,7 @@ HRESULT CheckXex(const char * filename){
 					if(xtractor.GetExecutionId(&xxxx)==S_OK){
 						current->XEX = xxxx;
 						// try to get info from cache
-						if(GetFromCacheByTitleId(current,current->XEX.TitleID)){
+						if(sCache.GetByTitleId(current,current->XEX.TitleID)){
 							check_spa = 0;
 						}
 					}
@@ -268,7 +272,7 @@ HRESULT CheckXex(const char * filename){
 			current->texture_filename = nxeart;
 						
 			// Add game
-			AddToCache(current);
+			sCache.Add(current);
 			RessourceQueue.Add(current);
 
 			xtractor.CloseXex();
@@ -389,7 +393,7 @@ static DWORD WINAPI ScanXexThread(LPVOID args ){
 	// always run when scan thread is running
 	DWORD exitcode;
 	// load cache data ...
-	LoadScanCache();
+	sCache.Load();
 	do{
 		GetExitCodeThread(ScanThread,&exitcode);
 
@@ -404,7 +408,7 @@ static DWORD WINAPI ScanXexThread(LPVOID args ){
 	}
 	while(exitcode==STILL_ACTIVE);
 	// save cache data
-	SaveScanCache();
+	sCache.Save();
 	printf("Scan xex finished\r\n");
 	return 0;
 }
